@@ -1,5 +1,5 @@
-#include <greeter/greeter.h>
-#include <greeter/version.h>
+#include <potato/greeter.h>
+#include <potato/version.h>
 
 #include <cxxopts.hpp>
 #include <iostream>
@@ -36,7 +36,7 @@ auto main(int argc, char** argv) -> int {
   }
 
   if (result["version"].as<bool>()) {
-    std::cout << "Potato, version " << GREETER_VERSION << std::endl;
+    std::cout << "Potato, version " << POTATO_VERSION << std::endl;
     return 0;
   }
 

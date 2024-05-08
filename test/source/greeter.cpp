@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
-#include <greeter/greeter.h>
-#include <greeter/version.h>
+#include <potato/greeter.h>
+#include <potato/version.h>
 
 #include <string>
 
@@ -16,6 +16,6 @@ TEST_CASE("Greeter") {
 }
 
 TEST_CASE("Greeter version") {
-  static_assert(std::string_view(GREETER_VERSION) == std::string_view("1.0"));
-  CHECK(std::string(GREETER_VERSION) == std::string("1.0"));
+  static_assert(std::string_view(POTATO_VERSION) == std::string_view("1.0"));
+  CHECK(std::string(POTATO_VERSION) == std::string("1.0"));
 }

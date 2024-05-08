@@ -1,5 +1,5 @@
 #include <fmt/format.h>
-#include <greeter/greeter.h>
+#include <potato/greeter.h>
 
 using namespace fantastic_potato;
 
