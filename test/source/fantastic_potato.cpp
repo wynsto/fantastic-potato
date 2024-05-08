@@ -4,10 +4,10 @@
 
 #include <string>
 
-TEST_CASE("Greeter") {
+TEST_CASE("FantasticPotato") {
   using namespace fantastic_potato;
 
-  Greeter fantastic_potato("Tests");
+  FantasticPotato fantastic_potato("Tests");
 
   CHECK(fantastic_potato.greet(LanguageCode::EN) == "Hello, Tests!");
   CHECK(fantastic_potato.greet(LanguageCode::DE) == "Hallo Tests!");
@@ -15,7 +15,7 @@ TEST_CASE("Greeter") {
   CHECK(fantastic_potato.greet(LanguageCode::FR) == "Bonjour Tests!");
 }
 
-TEST_CASE("Greeter version") {
+TEST_CASE("FantasticPotato version") {
   static_assert(std::string_view(GREETER_VERSION) == std::string_view("1.0"));
   CHECK(std::string(GREETER_VERSION) == std::string("1.0"));
 }

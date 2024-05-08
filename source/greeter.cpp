@@ -1,11 +1,11 @@
 #include <fmt/format.h>
-#include <greeter/greeter.h>
+#include <fantastic_potato/fantastic_potato.h>
 
-using namespace greeter;
+using namespace fantastic_potato;
 
-Greeter::Greeter(std::string _name) : name(std::move(_name)) {}
+FantasticPotato::FantasticPotato(std::string _name) : name(std::move(_name)) {}
 
-std::string Greeter::greet(LanguageCode lang) const {
+std::string FantasticPotato::greet(LanguageCode lang) const {
   switch (lang) {
     default:
     case LanguageCode::EN:
