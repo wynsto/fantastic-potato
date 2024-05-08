@@ -1,18 +1,18 @@
 #include <doctest/doctest.h>
-#include <greeter/greeter.h>
-#include <greeter/version.h>
+#include <fantastic_potato/fantastic_potato.h>
+#include <fantastic_potato/version.h>
 
 #include <string>
 
 TEST_CASE("Greeter") {
-  using namespace greeter;
+  using namespace fantastic_potato;
 
-  Greeter greeter("Tests");
+  Greeter fantastic_potato("Tests");
 
-  CHECK(greeter.greet(LanguageCode::EN) == "Hello, Tests!");
-  CHECK(greeter.greet(LanguageCode::DE) == "Hallo Tests!");
-  CHECK(greeter.greet(LanguageCode::ES) == "¡Hola Tests!");
-  CHECK(greeter.greet(LanguageCode::FR) == "Bonjour Tests!");
+  CHECK(fantastic_potato.greet(LanguageCode::EN) == "Hello, Tests!");
+  CHECK(fantastic_potato.greet(LanguageCode::DE) == "Hallo Tests!");
+  CHECK(fantastic_potato.greet(LanguageCode::ES) == "¡Hola Tests!");
+  CHECK(fantastic_potato.greet(LanguageCode::FR) == "Bonjour Tests!");
 }
 
 TEST_CASE("Greeter version") {
