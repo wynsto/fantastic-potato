@@ -25,7 +25,7 @@ namespace fantastic_potato {
      * @param lang the language to greet in
      * @return a string containing the greeting
      */
-    std::string fantastic_potato(LanguageCode lang = LanguageCode::EN) const;
+    std::string greet(LanguageCode lang = LanguageCode::EN) const;
   };
 
 }  // namespace greeter

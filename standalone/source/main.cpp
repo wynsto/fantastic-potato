@@ -46,7 +46,7 @@ auto main(int argc, char** argv) -> int {
     return 1;
   }
 
-  fantastic_potato::FantasticPotato fantastic_potato(name);
+  fantastic_potato::FantasticPotato greet(name);
   std::cout << fantastic_potato.greet(langIt->second) << std::endl;
 
   return 0;
