@@ -1,11 +1,13 @@
 #include <fmt/format.h>
 #include <potato/greeter.h>
+#include <curl/curl.h>
 
 using namespace fantastic_potato;
 
 Potato::Potato(std::string _name) : name(std::move(_name)) {}
 
 std::string Potato::greet(LanguageCode lang) const {
+  
   switch (lang) {
     default:
     case LanguageCode::EN:
