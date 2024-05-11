@@ -1,8 +1,11 @@
 #include <fmt/format.h>
 #include <potato/greeter.h>
 #include <curl/curl.h>
+#include <nlohmann/json.hpp>
 
 using namespace fantastic_potato;
+
+using json = nlohmann::json;
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -38,6 +41,10 @@ std::string Potato::greet(LanguageCode lang) const {
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
       res = curl_easy_perform(curl);
       curl_easy_cleanup(curl);
+      auto res = json::parse(readBuffer);
+      if (!res.empty()) {
+        return res[0]["date"];
+      }
       return readBuffer;
     }
   }
