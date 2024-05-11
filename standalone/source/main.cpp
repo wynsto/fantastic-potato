@@ -5,13 +5,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <curl/curl.h>
 
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-{
-  ((std::string*)userp)->append((char*)contents, size * nmemb);
-  return size * nmemb;
-}
 
 auto main(int argc, char** argv) -> int {
   const std::unordered_map<std::string, fantastic_potato::LanguageCode> languages{
@@ -56,17 +50,8 @@ auto main(int argc, char** argv) -> int {
   fantastic_potato::Potato potato(name);
   std::cout << potato.greet(langIt->second) << std::endl;
 
-  CURL *curl;
-  CURLcode res;
-  std::string readBuffer;
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com");
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-    std::cout<<readBuffer<<std::endl;
-  }
+  std::string url = "https://www.hongkongairport.com/flightinfo-rest/rest/flights/past?date=2024-05-02&lang=en&cargo=false&arrival=false";
+  std::cout << potato.get(url) << std::endl;
+  
   return 0;
 }

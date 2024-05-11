@@ -26,6 +26,9 @@ namespace fantastic_potato {
      * @return a string containing the greeting
      */
     std::string greet(LanguageCode lang = LanguageCode::EN) const;
+
+    std::string get(std::string url) const;
+
   };
 
 }  // namespace greeter
