@@ -19,7 +19,7 @@ CPMAddPackage("gh:doctest/doctest@2.4.9")
 CPMAddPackage("gh:TheLartians/Format.cmake@1.7.3")
 
 if(TEST_INSTALLED_VERSION)
-  find_package(potato REQUIRED)
+  find_package(Potato REQUIRED)
 else()
   CPMAddPackage(NAME Potato SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 endif()
@@ -28,7 +28,7 @@ endif()
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(${PROJECT_NAME} ${sources})
-target_link_libraries(${PROJECT_NAME} doctest::doctest potato::Potato)
+target_link_libraries(${PROJECT_NAME} doctest::doctest Potato::Potato)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings
