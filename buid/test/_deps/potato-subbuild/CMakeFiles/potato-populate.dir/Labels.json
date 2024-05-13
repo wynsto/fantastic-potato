@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/CMakeFiles/potato-populate"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/CMakeFiles/potato-populate.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/CMakeFiles/potato-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-build.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-download.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-install.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-test.rule"
+		},
+		{
+			"file" : "/Users/wynston/Development/fantastic-potato/buid/test/_deps/potato-subbuild/potato-populate-prefix/src/potato-populate-stamp/potato-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"potato-populate"
+		],
+		"name" : "potato-populate"
+	}
+}

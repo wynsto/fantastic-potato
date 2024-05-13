@@ -5,7 +5,7 @@
 #include <string>
 
 TEST_CASE("Greeter") {
-  using namespace greeter;
+  using namespace fantastic_potato;
 
   Potato greeter("Tests");
 

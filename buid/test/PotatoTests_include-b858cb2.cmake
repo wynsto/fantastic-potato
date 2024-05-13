@@ -1,0 +1,5 @@
+if(EXISTS "/Users/wynston/Development/fantastic-potato/buid/test/PotatoTests_tests-b858cb2.cmake")
+  include("/Users/wynston/Development/fantastic-potato/buid/test/PotatoTests_tests-b858cb2.cmake")
+else()
+  add_test(PotatoTests_NOT_BUILT-b858cb2 PotatoTests_NOT_BUILT-b858cb2)
+endif()
