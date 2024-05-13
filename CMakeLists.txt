@@ -25,7 +25,7 @@ include(cmake/CPM.cmake)
 
 # PackageProject.cmake will be used to make our target installable
 CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.8.0")
-CPMAddPackage("gh:nlohmann/json@3.11.3")
+# CPMAddPackage("gh:nlohmann/json@3.11.3")
 
 CPMAddPackage(
   NAME fmt
@@ -34,11 +34,11 @@ CPMAddPackage(
   OPTIONS "FMT_INSTALL YES" # create an installable target
 )
 
-# CPMAddPackage(
-#     NAME nlohmann_json
-#     GITHUB_REPOSITORY nlohmann/json
-#     VERSION 3.11.3
-# )
+CPMAddPackage(
+    NAME nlohmann_json
+    GITHUB_REPOSITORY nlohmann/json
+    OPTIONS "JSON_Install ON"
+    VERSION 3.11.3)
 
 #find_package(nlohmann-json REQUIRED)
 #find_package(nlohmann_json REQUIRED)
@@ -74,7 +74,7 @@ target_include_directories(
                          $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
-
+# install (EXPORT nlohmann_json DESTINATION lib)
 # ---- Create an installable target ----
 # this allows users to install and find the library via `find_package()`.
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14...3.22)
 
-project(FantasticPotatoTests LANGUAGES CXX)
+project(PotatoTests LANGUAGES CXX)
 
 # ---- Options ----
 
@@ -19,16 +19,16 @@ CPMAddPackage("gh:doctest/doctest@2.4.9")
 CPMAddPackage("gh:TheLartians/Format.cmake@1.7.3")
 
 if(TEST_INSTALLED_VERSION)
-  find_package(fantastic_potato REQUIRED)
+  find_package(Potato REQUIRED)
 else()
-  CPMAddPackage(NAME FantasticPotato SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
+  CPMAddPackage(NAME Potato SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 endif()
 
 # ---- Create binary ----
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(${PROJECT_NAME} ${sources})
-target_link_libraries(${PROJECT_NAME} doctest::doctest fantastic_potato::FantasticPotato)
+target_link_libraries(${PROJECT_NAME} doctest::doctest Potato::Potato)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings
@@ -55,6 +55,6 @@ doctest_discover_tests(${PROJECT_NAME})
 # ---- code coverage ----
 
 if(ENABLE_TEST_COVERAGE)
-  target_compile_options(FantasticPotato PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
-  target_link_options(FantasticPotato PUBLIC -fprofile-arcs -ftest-coverage)
+  target_compile_options(Potato PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
+  target_link_options(Potato PUBLIC -fprofile-arcs -ftest-coverage)
 endif()
