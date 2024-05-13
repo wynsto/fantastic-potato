@@ -7,7 +7,7 @@
 TEST_CASE("Greeter") {
   using namespace greeter;
 
-  Greeter greeter("Tests");
+  Potato greeter("Tests");
 
   CHECK(greeter.greet(LanguageCode::EN) == "Hello, Tests!");
   CHECK(greeter.greet(LanguageCode::DE) == "Hallo Tests!");
