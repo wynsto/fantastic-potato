@@ -36,6 +36,7 @@ CPMAddPackage(
 CPMAddPackage(
     NAME nlohmann_json
     GITHUB_REPOSITORY nlohmann/json
+    OPTIONS "JSON_Install ON"
     VERSION 3.11.3)
 
 #find_package(nlohmann-json REQUIRED)
@@ -65,14 +66,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt nlohmann_json::nlohmann_json ${CURL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt ${CURL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+  nlohmann_json::nlohmann_json)
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
-
+# install (EXPORT nlohmann_json DESTINATION lib)
 # ---- Create an installable target ----
 # this allows users to install and find the library via `find_package()`.
 
