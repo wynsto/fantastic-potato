@@ -18,6 +18,12 @@ include(../cmake/CPM.cmake)
 CPMAddPackage("gh:doctest/doctest@2.4.9")
 CPMAddPackage("gh:TheLartians/Format.cmake@1.7.3")
 
+CPMAddPackage(
+    NAME nlohmann_json
+    GITHUB_REPOSITORY nlohmann/json
+    OPTIONS "JSON_Install ON"
+    VERSION 3.11.3)
+
 if(TEST_INSTALLED_VERSION)
   find_package(Potato REQUIRED)
 else()
@@ -28,7 +34,7 @@ endif()
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(${PROJECT_NAME} ${sources})
-target_link_libraries(${PROJECT_NAME} doctest::doctest Potato::Potato)
+target_link_libraries(${PROJECT_NAME} doctest::doctest Potato::Potato nlohmann_json::nlohmann_json)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings
