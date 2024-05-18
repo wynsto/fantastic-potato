@@ -26,5 +26,5 @@ add_executable(${PROJECT_NAME} ${sources})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "Potato")
 
-include_directories(${CURL_INCLUDE_DIR})
+include_directories(${CURL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} Potato::Potato cxxopts)
