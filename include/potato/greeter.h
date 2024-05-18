@@ -27,6 +27,8 @@ namespace fantastic_potato {
      */
     std::string greet(LanguageCode lang = LanguageCode::EN) const;
 
+    std::string post(std::string url) const;
+  
     std::string get(std::string url) const;
 
   };

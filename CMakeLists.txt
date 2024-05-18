@@ -40,11 +40,7 @@ CPMAddPackage(
     OPTIONS "JSON_Install ON"
     VERSION 3.11.3)
 
-#find_package(nlohmann-json REQUIRED)
-#find_package(nlohmann_json REQUIRED)
-
-#find_package(nlohmann_json CONFIG REQUIRED)
-
+find_package(Boost 1.35.0 REQUIRED system)
 
 find_package(CURL REQUIRED)
 
@@ -57,7 +53,6 @@ file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
 # ---- Create library ----
-
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
 # target: add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME} ${headers} ${sources})
@@ -67,11 +62,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt nlohmann_json ${CURL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt nlohmann_json ${Boost_LIBRARIES} ${CURL_LIBRARIES})
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION} ${Boost_INCLUDE_DIR} >
 )
 
 # install (EXPORT nlohmann_json DESTINATION lib)

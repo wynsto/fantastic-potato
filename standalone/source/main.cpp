@@ -51,7 +51,9 @@ auto main(int argc, char** argv) -> int {
   std::cout << potato.greet(langIt->second) << std::endl;
 
   std::string url = "https://www.hongkongairport.com/flightinfo-rest/rest/flights/past?date=2024-05-02&lang=en&cargo=false&arrival=false";
+  std::string baseUrl = "https://api.schwabapi.com/trader/v1";
   std::string resp = potato.get(url);
+
   std::cout << resp << std::endl;
 
 
