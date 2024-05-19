@@ -24,7 +24,7 @@ Potato::Potato(std::string _name) : name(std::move(_name)) {
   string appKey = getenv("SCHWAB_APP_KEY");
   string appSecret = getenv("SCHWAB_APP_SECRET");
   
-  string base64Code = "";
+  string base64Code;
   string src = appKey + ":" + appSecret;
   base64Code.resize(encoded_size(src.size()));
 
