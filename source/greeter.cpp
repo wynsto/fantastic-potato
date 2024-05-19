@@ -54,7 +54,7 @@ std::string Potato::post(std::string url, std::string data) const {
   curl = curl_easy_init();
 
   struct curl_slist *headers= NULL; /* init to NULL is important */
-  headers = curl_slist_append(headers, auth);
+  headers = curl_slist_append(headers, auth.c_str());
   headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
 
   if(curl) {
