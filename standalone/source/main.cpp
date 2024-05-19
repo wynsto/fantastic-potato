@@ -5,8 +5,6 @@
 #include <boost/beast/version.hpp>
 #include <boost/beast/core/detail/base64.hpp>
 #include <boost/asio.hpp>
-#include <boost/url/parse.hpp>
-#include <boost/url/url_view.hpp>
 
 #include <cxxopts.hpp>
 #include <iostream>
