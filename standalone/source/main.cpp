@@ -157,9 +157,10 @@ private:
     create_response()
     {
         if(request_.target().starts_with("/callback")) {
-          string target = request_.target();
-          string queryStr = target.substr(10);
-          std::map<std::string, std::string> query = parse_query_string(queryStr);
+          string_view queryStrView = request_.target();
+          queryStrView.remove_prefix(10);
+          string s = {queryStrView.begin(), queryStrView.end()};
+          std::map<std::string, std::string> query = parse_query_string(s);
           cout << query["code"] << endl;
           
           string code = query["code"];
