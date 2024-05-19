@@ -62,7 +62,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt nlohmann_json ${Boost_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt pthread nlohmann_json ${Boost_LIBRARIES} ${CURL_LIBRARIES})
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

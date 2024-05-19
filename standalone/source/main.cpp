@@ -246,7 +246,7 @@ auto main(int argc, char** argv) -> int {
   try
   {
       auto const address = net::ip::make_address("0.0.0.0");
-      unsigned short port = static_cast<unsigned short>(std::atoi("80"));
+      unsigned short port = static_cast<unsigned short>(std::atoi("8081"));
 
       net::io_context ioc{1};
 
@@ -259,7 +259,6 @@ auto main(int argc, char** argv) -> int {
   catch(std::exception const& e)
   {
       std::cerr << "Error: " << e.what() << std::endl;
-      return EXIT_FAILURE;
   }
 
 
