@@ -159,11 +159,15 @@ private:
           boost::beast::string_view queryStrView = request_.target();
           queryStrView.remove_prefix(10);
           string s = {queryStrView.begin(), queryStrView.end()};
-          std::map<std::string, std::string> query = parse_query_string(s);
-          cout << query["code"] << endl;
+          string code = "";
+          if(!s.empty()) {
+            std::map<std::string, std::string> query = parse_query_string(s);
+            cout << query["code"] << endl;
+            code = query["code"];
+          }
+    
           
-          string code = query["code"];
-          string callbackUrl = std::getenv("SCHWAB_CALLBACK_URL");
+          string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
           string baseUrl = "https://api.schwabapi.com/v1";
 
           string postData = fmt::format("grant_type=authorization_code&code={}&redirect_uri={}", code, callbackUrl);
