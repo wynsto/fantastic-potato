@@ -3,7 +3,10 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
+#include <boost/beast/core/detail/base64.hpp>
 #include <boost/asio.hpp>
+#include <boost/url/parse.hpp>
+#include <boost/url/url_view.hpp>
 
 #include <cxxopts.hpp>
 #include <iostream>
@@ -11,14 +14,18 @@
 #include <unordered_map>
 #include <array>
 #include <ctime>
+#include <fmt/format.h>
 
 
 #include <chrono>
 #include <cstdlib>
 #include <memory>
+#include <map>
+#include <sstream>
 
 using boost::asio::ip::tcp;
-
+using namespace boost::beast::detail::base64;
+using namespace std;
 
 std::string make_daytime_string()
 {
@@ -26,6 +33,21 @@ std::string make_daytime_string()
   time_t now = time(0);
   std::string result = ctime(&now);
   result += "hello";
+  return result;
+}
+
+std::map<std::string, std::string> parse_query_string(const std::string& query) {
+  std::map<std::string, std::string> result;
+  std::istringstream ss(query);
+  std::string item;
+  while (std::getline(ss, item, '&')) {
+    std::size_t pos = item.find('=');
+    if (pos != std::string::npos) {
+      std::string key = item.substr(0, pos);
+      std::string value = item.substr(pos + 1);
+      result[key] = value;
+    }
+  }
   return result;
 }
 
@@ -136,33 +158,23 @@ private:
     void
     create_response()
     {
-        if(request_.target() == "/count")
-        {
-            response_.set(http::field::content_type, "text/html");
-            beast::ostream(response_.body())
-                << "<html>\n"
-                <<  "<head><title>Request count</title></head>\n"
-                <<  "<body>\n"
-                <<  "<h1>Request count</h1>\n"
-                <<  "<p>There have been "
-                <<  my_program_state::request_count()
-                <<  " requests so far.</p>\n"
-                <<  "</body>\n"
-                <<  "</html>\n";
-        }
-        else if(request_.target() == "/time")
-        {
-            response_.set(http::field::content_type, "text/html");
-            beast::ostream(response_.body())
-                <<  "<html>\n"
-                <<  "<head><title>Current time</title></head>\n"
-                <<  "<body>\n"
-                <<  "<h1>Current time</h1>\n"
-                <<  "<p>The current time is "
-                <<  my_program_state::now()
-                <<  " seconds since the epoch.</p>\n"
-                <<  "</body>\n"
-                <<  "</html>\n";
+        if(request_.target().starts_with("/callback")) {
+          string queryStr = request_.target().substr(10);
+          std::map<std::string, std::string> query = parse_query_string(queryStr);
+          cout << query["code"] << endl;
+          
+          string code = query["code"];
+          string callbackUrl = std::getenv("SCHWAB_CALLBACK_URL");
+          string baseUrl = "https://api.schwabapi.com/v1";
+
+          string postData = fmt::format("grant_type=authorization_code&code={}&redirect_uri={}", code, callbackUrl);
+        
+          string tokenUrl = baseUrl + "/oauth/token";
+          fantastic_potato::Potato potato("potato");
+          string resp = potato.post(tokenUrl, postData);
+          response_.result(http::status::ok);
+          response_.set(http::field::content_type, "application/json");
+          beast::ostream(response_.body()) << resp;
         }
         else
         {
@@ -222,109 +234,32 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
 }
 
 auto main(int argc, char** argv) -> int {
-  const std::unordered_map<std::string, fantastic_potato::LanguageCode> languages{
-      {"en", fantastic_potato::LanguageCode::EN},
-      {"de", fantastic_potato::LanguageCode::DE},
-      {"es", fantastic_potato::LanguageCode::ES},
-      {"fr", fantastic_potato::LanguageCode::FR},
-  };
+  string baseUrl = "https://api.schwabapi.com/v1";
+  string appKey = std::getenv("SCHWAB_APP_KEY");
+  string appSecret = std::getenv("SCHWAB_APP_SECRET");
+  string callbackUrl = std::getenv("SCHWAB_CALLBACK_URL");
+  string oauth = "oauth/authorize";
+  string url = fmt::format("{}/oauth/authorize?client_id={}&redirect_uri={}", baseUrl, appKey, callbackUrl);
 
-  cxxopts::Options options(*argv, "A program to welcome the world!");
-
-  std::string language;
-  std::string name;
-
-  // clang-format off
-  options.add_options()
-    ("h,help", "Show help")
-    ("v,version", "Print the current version number")
-    ("n,name", "Name to greet", cxxopts::value(name)->default_value("World"))
-    ("l,lang", "Language code to use", cxxopts::value(language)->default_value("en"))
-  ;
-  // clang-format on
-
-  auto result = options.parse(argc, argv);
-
-  if (result["help"].as<bool>()) {
-    std::cout << options.help() << std::endl;
-    return 0;
-  }
-
-  if (result["version"].as<bool>()) {
-    std::cout << "Potato, version " << POTATO_VERSION << std::endl;
-    return 0;
-  }
-
-  auto langIt = languages.find(language);
-  if (langIt == languages.end()) {
-    std::cerr << "unknown language code: " << language << std::endl;
-    return 1;
-  }
-
-  fantastic_potato::Potato potato(name);
-  std::cout << potato.greet(langIt->second) << std::endl;
-
-  // std::string url = "https://www.hongkongairport.com/flightinfo-rest/rest/flights/past?date=2024-05-02&lang=en&cargo=false&arrival=false";
-  // std::string baseUrl = "https://api.schwabapi.com/trader/v1";
-  // std::string resp = potato.get(url);
-
-  // std::cout << resp << std::endl;
-  std::cout << std::getenv("SCHWAB_APP_KEY")<<std::endl;
-
-  std::cout << std::getenv("SCHWAB_APP_SECRET")<<std::endl;
-  try
-    {
-        // Check command line arguments.
-        if(argc != 3)
-        {
-            std::cerr << "Usage: " << argv[0] << " <address> <port>\n";
-            std::cerr << "  For IPv4, try:\n";
-            std::cerr << "    receiver 0.0.0.0 80\n";
-            std::cerr << "  For IPv6, try:\n";
-            std::cerr << "    receiver 0::0 80\n";
-            return EXIT_FAILURE;
-        }
-
-        auto const address = net::ip::make_address(argv[1]);
-        unsigned short port = static_cast<unsigned short>(std::atoi(argv[2]));
-
-        net::io_context ioc{1};
-
-        tcp::acceptor acceptor{ioc, {address, port}};
-        tcp::socket socket{ioc};
-        http_server(acceptor, socket);
-
-        ioc.run();
-    }
-    catch(std::exception const& e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
+  cout << url << endl;
+  
   try
   {
-    boost::asio::io_context io_context;
+      auto const address = net::ip::make_address("0.0.0.0");
+      unsigned short port = static_cast<unsigned short>(std::atoi("80"));
 
-    std::cout << "Potato, version " << POTATO_VERSION << std::endl;
-    std::cout << "Potato, port " << 8013 << std::endl;
+      net::io_context ioc{1};
 
-    tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8013));
+      tcp::acceptor acceptor{ioc, {address, port}};
+      tcp::socket socket{ioc};
+      http_server(acceptor, socket);
 
-    for (;;)
-    {
-      tcp::socket socket(io_context);
-      acceptor.accept(socket);
-
-      std::string message = make_daytime_string();
-
-      boost::system::error_code ignored_error;
-      boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
-    }
+      ioc.run();
   }
-  catch (std::exception& e)
+  catch(std::exception const& e)
   {
-    std::cerr << e.what() << std::endl;
+      std::cerr << "Error: " << e.what() << std::endl;
+      return EXIT_FAILURE;
   }
 
 

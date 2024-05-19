@@ -12,6 +12,7 @@ namespace fantastic_potato {
    */
   class Potato {
     std::string name;
+    std::string auth;
 
   public:
     /**
@@ -27,7 +28,7 @@ namespace fantastic_potato {
      */
     std::string greet(LanguageCode lang = LanguageCode::EN) const;
 
-    std::string post(std::string url) const;
+    std::string post(std::string url, std::string data) const;
   
     std::string get(std::string url) const;
 
