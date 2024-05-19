@@ -68,6 +68,7 @@ std::string Potato::post(std::string url, std::string data) const {
     curl_easy_cleanup(curl);
     return readBuffer;
   }
+  return "error";
 }
 
 std::string Potato::get(std::string url) const {
@@ -87,5 +88,6 @@ std::string Potato::get(std::string url) const {
     }
     return readBuffer;
   }
+  return "error";
 }
 
