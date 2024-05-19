@@ -157,7 +157,8 @@ private:
     create_response()
     {
         if(request_.target().starts_with("/callback")) {
-          string queryStr = request_.target().substr(10);
+          string target = request_.target();
+          string queryStr = target.substr(10);
           std::map<std::string, std::string> query = parse_query_string(queryStr);
           cout << query["code"] << endl;
           
