@@ -6,6 +6,8 @@
 #include <boost/beast/core/detail/base64.hpp>
 #include <boost/asio.hpp>
 
+#include <sqlite3.h>
+
 #include <cxxopts.hpp>
 #include <iostream>
 #include <string>
@@ -236,6 +238,14 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
       });
 }
 
+static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+  int i;
+  for (i = 0; i< argc; i++) {
+    cout << azColName[i] << argv[i] <<endl;
+  }
+  return 0;
+}
+
 auto main(int argc, char** argv) -> int {
   string baseUrl = "https://api.schwabapi.com/v1";
   string appKey = std::getenv("SCHWAB_APP_KEY");
@@ -246,7 +256,30 @@ auto main(int argc, char** argv) -> int {
 
   cout << url << endl;
   
-  try
+  sqlite3 *db;
+  char *zErrMsg = 0;
+  int rc;
+
+  rc = sqlite3_open("test.db", &db);
+  if (rc){
+    cout << rc << endl;
+    string msg = sqlite3_errmsg(db);
+    cout << "Cannot open database: " << msg <<endl;
+    sqlite3_close(db);
+    return 1;
+  }
+
+  rc = sqlite3_exec(db, argv[1], callback, 0, &zErrMsg);
+  if (rc != SQLITE_OK) {
+    cout << zErrMsg << endl;
+    sqlite3_free(zErrMsg);
+  }
+  rc = sqlite3_close(db);
+  if (rc != SQLITE_OK) {
+    cout << "Cannot close database::"<< sqlite3_errmsg(db)  <<endl;
+    return 1;
+  }
+  try 
   {
       auto const address = net::ip::make_address("0.0.0.0");
       unsigned short port = static_cast<unsigned short>(std::atoi("8081"));

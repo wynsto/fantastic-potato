@@ -44,6 +44,8 @@ find_package(Boost 1.35.0 REQUIRED system)
 
 find_package(CURL REQUIRED)
 
+find_package(SQLite3)
+
 
 # ---- Add source files ----
 
@@ -62,11 +64,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt pthread nlohmann_json ${Boost_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt pthread nlohmann_json ${Boost_LIBRARIES} ${CURL_LIBRARIES} SQLite::SQLite3)
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION} ${Boost_INCLUDE_DIR} >
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION} ${Boost_INCLUDE_DIR} >
 )
 
 # install (EXPORT nlohmann_json DESTINATION lib)
