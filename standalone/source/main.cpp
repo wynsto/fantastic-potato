@@ -1,12 +1,16 @@
 #include <potato/greeter.h>
+#include <potato/db.h>
 #include <potato/version.h>
+
+#include <nlohmann/json.hpp>
+
+
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/beast/core/detail/base64.hpp>
 #include <boost/asio.hpp>
 
-#include <sqlite3.h>
 
 #include <cxxopts.hpp>
 #include <iostream>
@@ -23,6 +27,7 @@
 #include <map>
 #include <sstream>
 
+using json = nlohmann::json;
 using boost::asio::ip::tcp;
 using namespace boost::beast::detail::base64;
 using namespace std;
@@ -176,9 +181,21 @@ private:
         
           string tokenUrl = baseUrl + "/oauth/token";
           fantastic_potato::Potato potato("potato");
+          fantastic_potato::DB db("test.db");
+
           string resp = potato.post(tokenUrl, postData);
           response_.result(http::status::ok);
           response_.set(http::field::content_type, "application/json");
+          cout << resp << endl;
+          auto data = json::parse(resp);
+          auto refreshToken = data["refresh_token"];
+          auto accessToken = data["access_token"];
+          cout << refreshToken << " and " << accessToken <<endl;
+          if (typeid(refreshToken) == typeid(string))
+          db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
+          if(typeid(accessToken) == typeid(string))
+          db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')";
+
           beast::ostream(response_.body()) << resp;
         }
         else
@@ -255,30 +272,7 @@ auto main(int argc, char** argv) -> int {
   string url = fmt::format("{}/oauth/authorize?client_id={}&redirect_uri={}", baseUrl, appKey, callbackUrl);
 
   cout << url << endl;
-  
-  sqlite3 *db;
-  char *zErrMsg = 0;
-  int rc;
 
-  rc = sqlite3_open("test.db", &db);
-  if (rc){
-    cout << rc << endl;
-    string msg = sqlite3_errmsg(db);
-    cout << "Cannot open database: " << msg <<endl;
-    sqlite3_close(db);
-    return 1;
-  }
-
-  rc = sqlite3_exec(db, argv[1], callback, 0, &zErrMsg);
-  if (rc != SQLITE_OK) {
-    cout << zErrMsg << endl;
-    sqlite3_free(zErrMsg);
-  }
-  rc = sqlite3_close(db);
-  if (rc != SQLITE_OK) {
-    cout << "Cannot close database::"<< sqlite3_errmsg(db)  <<endl;
-    return 1;
-  }
   try 
   {
       auto const address = net::ip::make_address("0.0.0.0");

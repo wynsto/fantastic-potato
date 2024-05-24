@@ -17,6 +17,13 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
+  NAME nlohmann_json
+  GITHUB_REPOSITORY nlohmann/json
+  OPTIONS "JSON_Install ON"
+  VERSION 3.11.3
+)
+
+CPMAddPackage(
   NAME fmt
   GIT_TAG 10.2.1
   GITHUB_REPOSITORY fmtlib/fmt
@@ -35,4 +42,4 @@ add_executable(${PROJECT_NAME} ${sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "Potato")
 
 include_directories(${CURL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} Potato::Potato cxxopts fmt::fmt)
+target_link_libraries(${PROJECT_NAME} Potato::Potato cxxopts fmt::fmt nlohmann_json)
