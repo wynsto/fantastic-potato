@@ -13,6 +13,7 @@ namespace fantastic_potato {
   class Potato {
     std::string name;
     std::string auth;
+    std::string bearerAuth;
 
   public:
     /**
@@ -32,6 +33,11 @@ namespace fantastic_potato {
   
     std::string get(std::string url) const;
 
+    std::string getAfterAuth(std::string url) const;
+
+    void setAuth(std::string auth);
+
+    void setBearerAuth(std::string bearerAuth);
   };
 
 }  // namespace greeter

@@ -6,14 +6,15 @@
 
 using namespace std;
 namespace fantastic_potato {
-  class DB {
+  class SchwabDB {
     string name;
     sqlite3 *db;
     char *zErrMsg;
     static int callback(void *data, int argc, char **argv, char **azColName);
     public:
-    DB(string name);
-    ~DB();
+    SchwabDB(string name);
+    ~SchwabDB();
     string query(string sql);
+    string getValueByType(string type);
   };
 }
