@@ -188,14 +188,15 @@ private:
           response_.set(http::field::content_type, "application/json");
           cout << resp << endl;
           auto data = json::parse(resp);
-          auto refreshToken = data["refresh_token"];
-          auto accessToken = data["access_token"];
-          cout << refreshToken << " and " << accessToken <<endl;
-          if (typeid(refreshToken) == typeid(string))
-          db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
-          if(typeid(accessToken) == typeid(string))
-          db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')";
-
+          if (data.contains("refresh_token") && data.contains("access_token")) {
+            string refreshToken = data["refresh_token"];
+            string accessToken = data["access_token"];
+            cout << refreshToken << " and " << accessToken <<endl;
+            if (typeid(refreshToken) == typeid(string))
+            db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
+            if(typeid(accessToken) == typeid(string))
+            db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')");
+          }
           beast::ostream(response_.body()) << resp;
         }
         else
@@ -255,15 +256,12 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
       });
 }
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-  int i;
-  for (i = 0; i< argc; i++) {
-    cout << azColName[i] << argv[i] <<endl;
-  }
-  return 0;
-}
-
 auto main(int argc, char** argv) -> int {
+  fantastic_potato::DB db("test.db");
+  db.query("create table if not exists schwab_kv (key text, value text)");
+  db.query("select * from schwab_kv");
+
+
   string baseUrl = "https://api.schwabapi.com/v1";
   string appKey = std::getenv("SCHWAB_APP_KEY");
   string appSecret = std::getenv("SCHWAB_APP_SECRET");

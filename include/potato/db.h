@@ -10,6 +10,7 @@ namespace fantastic_potato {
     string name;
     sqlite3 *db;
     char *zErrMsg;
+    static int callback(void *data, int argc, char **argv, char **azColName);
     public:
     DB(string name);
     ~DB();
