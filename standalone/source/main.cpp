@@ -1,12 +1,11 @@
-#include <potato/greeter.h>
-#include <potato/db.h>
-#include <potato/version.h>
-
+#include <schwab/greeter.h>
+#include <schwab/db.h>
+#include <schwab/version.h>
+#include <schwab/http_connection.h>
 #include <nlohmann/json.hpp>
 
 
 #include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/beast/core/detail/base64.hpp>
 #include <boost/asio.hpp>
@@ -32,216 +31,8 @@ using boost::asio::ip::tcp;
 using namespace boost::beast::detail::base64;
 using namespace std;
 namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
-
-std::string make_daytime_string()
-{
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  std::string result = ctime(&now);
-  result += "hello";
-  return result;
-}
-
-std::map<std::string, std::string> parse_query_string(const std::string& query) {
-  std::map<std::string, std::string> result;
-  std::istringstream ss(query);
-  std::string item;
-  while (std::getline(ss, item, '&')) {
-    std::size_t pos = item.find('=');
-    if (pos != std::string::npos) {
-      std::string key = item.substr(0, pos);
-      std::string value = item.substr(pos + 1);
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-namespace my_program_state
-{
-    std::size_t
-    request_count()
-    {
-        static std::size_t count = 0;
-        return ++count;
-    }
-
-    std::time_t
-    now()
-    {
-        return std::time(0);
-    }
-}
-
-class http_connection : public std::enable_shared_from_this<http_connection>
-{
-public:
-    http_connection(tcp::socket socket)
-        : socket_(std::move(socket))
-    {
-    }
-
-    // Initiate the asynchronous operations associated with the connection.
-    void
-    start()
-    {
-        read_request();
-        check_deadline();
-    }
-
-private:
-    // The socket for the currently connected client.
-    tcp::socket socket_;
-
-    // The buffer for performing reads.
-    beast::flat_buffer buffer_{8192};
-
-    // The request message.
-    http::request<http::dynamic_body> request_;
-
-    // The response message.
-    http::response<http::dynamic_body> response_;
-
-    // The timer for putting a deadline on connection processing.
-    net::steady_timer deadline_{
-        socket_.get_executor(), std::chrono::seconds(60)};
-
-    // Asynchronously receive a complete request message.
-    void
-    read_request()
-    {
-        auto self = shared_from_this();
-
-        http::async_read(
-            socket_,
-            buffer_,
-            request_,
-            [self](beast::error_code ec,
-                std::size_t bytes_transferred)
-            {
-                boost::ignore_unused(bytes_transferred);
-                if(!ec)
-                    self->process_request();
-            });
-    }
-
-    // Determine what needs to be done with the request message.
-    void
-    process_request()
-    {
-        response_.version(request_.version());
-        response_.keep_alive(false);
-
-        switch(request_.method())
-        {
-        case http::verb::get:
-            response_.result(http::status::ok);
-            response_.set(http::field::server, "Beast");
-            create_response();
-            break;
-
-        default:
-            // We return responses indicating an error if
-            // we do not recognize the request method.
-            response_.result(http::status::bad_request);
-            response_.set(http::field::content_type, "text/plain");
-            beast::ostream(response_.body())
-                << "Invalid request-method '"
-                << std::string(request_.method_string())
-                << "'";
-            break;
-        }
-
-        write_response();
-    }
-
-    // Construct a response message based on the program state.
-    void
-    create_response()
-    {
-        if(request_.target().starts_with("/callback")) {
-          boost::beast::string_view queryStrView = request_.target();
-          queryStrView.remove_prefix(10);
-          string s = {queryStrView.begin(), queryStrView.end()};
-          string code = "";
-          if(!s.empty()) {
-            std::map<std::string, std::string> query = parse_query_string(s);
-            cout << query["code"] << endl;
-            code = query["code"];
-          }
-    
-          
-          string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
-          string baseUrl = "https://api.schwabapi.com/v1";
-
-          string postData = fmt::format("grant_type=authorization_code&code={}&redirect_uri={}", code, callbackUrl);
-        
-          string tokenUrl = baseUrl + "/oauth/token";
-          fantastic_potato::Potato potato("potato");
-          fantastic_potato::SchwabDB db("test.db");
-
-          string resp = potato.post(tokenUrl, postData);
-          response_.result(http::status::ok);
-          response_.set(http::field::content_type, "application/json");
-          cout << resp << endl;
-          auto data = json::parse(resp);
-          if (data.contains("refresh_token") && data.contains("access_token")) {
-            string refreshToken = data["refresh_token"];
-            string accessToken = data["access_token"];
-            cout << refreshToken << " and " << accessToken <<endl;
-            if (typeid(refreshToken) == typeid(string))
-            db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
-            if(typeid(accessToken) == typeid(string))
-            db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')");
-          }
-          beast::ostream(response_.body()) << resp;
-        }
-        else
-        {
-            response_.result(http::status::not_found);
-            response_.set(http::field::content_type, "text/plain");
-            beast::ostream(response_.body()) << "File not found\r\n";
-        }
-    }
-
-    // Asynchronously transmit the response message.
-    void
-    write_response()
-    {
-        auto self = shared_from_this();
-
-        response_.content_length(response_.body().size());
-
-        http::async_write(
-            socket_,
-            response_,
-            [self](beast::error_code ec, std::size_t)
-            {
-                self->socket_.shutdown(tcp::socket::shutdown_send, ec);
-                self->deadline_.cancel();
-            });
-    }
-
-    // Check whether we have spent enough time on this connection.
-    void
-    check_deadline()
-    {
-        auto self = shared_from_this();
-
-        deadline_.async_wait(
-            [self](beast::error_code ec)
-            {
-                if(!ec)
-                {
-                    // Close socket to cancel any outstanding operation.
-                    self->socket_.close(ec);
-                }
-            });
-    }
-};
 
 // "Loop" forever accepting new connections.
 void
@@ -257,7 +48,10 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
 }
 
 auto main(int argc, char** argv) -> int {
-  fantastic_potato::SchwabDB db("test.db");
+    time_t timer;
+    timer = time(NULL);
+    cout << "Time: " << timer << endl;
+  schwab_personal_trading::SchwabDB db("test.db");
   // db.query("create table if not exists schwab_kv (key text, value text)");
   string accessToken = db.getValueByType("accessToken");
   clog << "accessToken: " << accessToken << endl;
@@ -271,34 +65,12 @@ auto main(int argc, char** argv) -> int {
   string callbackUrl = std::getenv("SCHWAB_CALLBACK_URL");
   string oauth = "oauth/authorize";
   if (accessToken != "" && refreshToken != "") {
-
-    string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
-    string baseUrl = "https://api.schwabapi.com/v1";
-
-    string postData = fmt::format("grant_type=refresh_token&refresh_token={}&redirect_uri={}", refreshToken, callbackUrl);
-
-    string tokenUrl = baseUrl + "/oauth/token";
-    fantastic_potato::SchwabDB db("test.db");
-    fantastic_potato::Potato potato("potato");
-
-    string resp = potato.post(tokenUrl, postData);
-    cout << resp << endl;
-    auto data = json::parse(resp);
-    if (data.contains("refresh_token") && data.contains("access_token")) {
-    refreshToken = data["refresh_token"];
-    accessToken = data["access_token"];
-    cout << refreshToken << " and " << accessToken <<endl;
-    if (typeid(refreshToken) == typeid(string))
-        db.query("insert or replace into schwab_kv values('refreshToken', '" + refreshToken + "')");
-    if(typeid(accessToken) == typeid(string))
-        db.query("insert or replace into schwab_kv values('accessToken', '" + accessToken + "')");
-    }
-
-
+    schwab_personal_trading::Potato potato("potato");
+    accessToken = potato.getAccessToken("refresh_token", refreshToken);
     // string marketData = "https://api.schwabapi.com/marketdata/v1";
     string quotes = "https://api.schwabapi.com/marketdata/v1/quotes?symbols=AAPL";
     potato.setBearerAuth(accessToken);
-    resp = potato.getAfterAuth(quotes);
+    string resp = potato.getAfterAuth(quotes);
     cout << resp << endl;
     return EXIT_SUCCESS;
   } else {

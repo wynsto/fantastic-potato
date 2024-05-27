@@ -5,7 +5,7 @@
 
 
 using namespace std;
-namespace fantastic_potato {
+namespace schwab_personal_trading {
   class SchwabDB {
     string name;
     sqlite3 *db;

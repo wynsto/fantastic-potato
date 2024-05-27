@@ -1,11 +1,11 @@
-#include <potato/db.h>
+#include <schwab/db.h>
 #include <sqlite3.h>
 
 #include <iostream>
 #include "db.h"
 
 using namespace std;
-using namespace fantastic_potato;
+using namespace schwab_personal_trading;
 
 int SchwabDB::callback(void *NotUsed, int argc, char **argv, char **azColName) {
   int i;

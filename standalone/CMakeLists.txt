@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14...3.22)
 
-project(GreeterStandalone LANGUAGES CXX)
+project(SchwabStandalone LANGUAGES CXX)
 
 # --- Import tools ----
 
@@ -31,7 +31,7 @@ CPMAddPackage(
 )
 
 
-CPMAddPackage(NAME Potato SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
+CPMAddPackage(NAME Schwab SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
 # ---- Create standalone executable ----
 
@@ -39,7 +39,7 @@ file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 
 add_executable(${PROJECT_NAME} ${sources})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "Potato")
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "Schwab")
 
 include_directories(${CURL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} Potato::Potato cxxopts fmt::fmt nlohmann_json)
+target_link_libraries(${PROJECT_NAME} Schwab::Schwab cxxopts fmt::fmt nlohmann_json)

@@ -1,29 +1,29 @@
-#include <fmt/format.h>
-#include <potato/greeter.h>
 #include <curl/curl.h>
-#include <nlohmann/json.hpp>
+#include <fmt/format.h>
+#include <schwab/db.h>
+#include <schwab/greeter.h>
+
 #include <boost/beast/core/detail/base64.hpp>
 #include <iostream>
+#include <nlohmann/json.hpp>
 
-
-using namespace fantastic_potato;
+using namespace schwab_personal_trading;
 using namespace std;
 using namespace boost::beast::detail::base64;
 
 using json = nlohmann::json;
 
-std::string baseUrl="";
+string baseUrl = "";
 
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-{
-  ((std::string*)userp)->append((char*)contents, size * nmemb);
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((string *)userp)->append((char *)contents, size * nmemb);
   return size * nmemb;
 }
 
-Potato::Potato(std::string _name) : name(std::move(_name)) {
+Potato::Potato(string _name) : name(std::move(_name)) {
   string appKey = getenv("SCHWAB_APP_KEY");
   string appSecret = getenv("SCHWAB_APP_SECRET");
-  
+
   string base64Code;
   string src = appKey + ":" + appSecret;
   base64Code.resize(encoded_size(src.size()));
@@ -32,32 +32,17 @@ Potato::Potato(std::string _name) : name(std::move(_name)) {
   auth = "Authorization: Basic " + base64Code;
 }
 
-std::string Potato::greet(LanguageCode lang) const {
-  
-  switch (lang) {
-    default:
-    case LanguageCode::EN:
-      return fmt::format("Hello, Potato {}!", name);
-    case LanguageCode::DE:
-      return fmt::format("Hallo Potato {}!", name);
-    case LanguageCode::ES:
-      return fmt::format("¡Hola Potato {}!", name);
-    case LanguageCode::FR:
-      return fmt::format("Bonjour Potato {}!", name);
-  }
-}
-
-std::string Potato::post(std::string url, std::string data) const {
+string Potato::post(string url, string data) const {
   CURL *curl;
   CURLcode res;
-  std::string readBuffer;
+  string readBuffer;
   curl = curl_easy_init();
 
-  struct curl_slist *headers= NULL; /* init to NULL is important */
+  struct curl_slist *headers = NULL; /* init to NULL is important */
   headers = curl_slist_append(headers, auth.c_str());
   headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
 
-  if(curl) {
+  if (curl) {
     curl_easy_setopt(curl, CURLOPT_POST, 1);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -71,12 +56,12 @@ std::string Potato::post(std::string url, std::string data) const {
   return "error";
 }
 
-std::string Potato::get(std::string url) const {
+string Potato::get(string url) const {
   CURL *curl;
   CURLcode res;
-  std::string readBuffer;
+  string readBuffer;
   curl = curl_easy_init();
-  if(curl) {
+  if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
@@ -91,17 +76,43 @@ std::string Potato::get(std::string url) const {
   return "error";
 }
 
-std::string Potato::getAfterAuth(std::string url) const {
+string Potato::getAccessToken(string grantType, string token) {
+  string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
+  string baseUrl = "https://api.schwabapi.com/v1";
+
+  string postData = fmt::format("grant_type={}&{}={}&redirect_uri={}", grantType, grantType, token,
+                                callbackUrl);
+
+  string tokenUrl = baseUrl + "/oauth/token";
+  schwab_personal_trading::SchwabDB db("test.db");
+
+  string resp = this->post(tokenUrl, postData);
+  cout << resp << endl;
+  auto data = json::parse(resp);
+  string accessToken, refreshToken;
+  if (data.contains("refresh_token") && data.contains("access_token")) {
+    refreshToken = data["refresh_token"];
+    accessToken = data["access_token"];
+    cout << refreshToken << " and " << accessToken << endl;
+    if (typeid(refreshToken) == typeid(string))
+      db.query("insert or replace into schwab_kv values('refreshToken', '" + refreshToken + "')");
+    if (typeid(accessToken) == typeid(string))
+      db.query("insert or replace into schwab_kv values('accessToken', '" + accessToken + "')");
+  }
+  return accessToken;
+}
+
+string Potato::getAfterAuth(string url) const {
   CURL *curl;
   CURLcode res;
-  std::string readBuffer;
+  string readBuffer;
   curl = curl_easy_init();
 
-  struct curl_slist *headers= NULL; /* init to NULL is important */
+  struct curl_slist *headers = NULL; /* init to NULL is important */
   headers = curl_slist_append(headers, bearerAuth.c_str());
   headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
 
-  if(curl) {
+  if (curl) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -113,8 +124,6 @@ std::string Potato::getAfterAuth(std::string url) const {
   return "error";
 }
 
-void Potato::setBearerAuth(std::string accessToken) {
+void Potato::setBearerAuth(string accessToken) {
   bearerAuth = "Authorization: Bearer " + accessToken;
 }
-
-
