@@ -70,6 +70,7 @@ target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION} ${Boost_INCLUDE_DIR} >
 )
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 # install (EXPORT nlohmann_json DESTINATION lib)
 # ---- Create an installable target ----
