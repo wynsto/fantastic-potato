@@ -30,7 +30,7 @@ jobs:
       - name: configure
         run: |
           sudo apt-get install libcurl4-openssl-dev
-          sudo apt-get install boost
+          sudo apt-get install boost libboost-all-dev
           cmake -Stest -Bbuild -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
 
       - name: build
