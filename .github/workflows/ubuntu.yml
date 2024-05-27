@@ -42,7 +42,7 @@ jobs:
           # OPTIONAL: Specify a toolset
           #toolset: gcc
           # OPTIONAL: Specify an architecture
-          arch: amd64
+          arch: x86
     
           # NOTE: If a boost version matching all requirements cannot be found,
           # this build step will fail
