@@ -181,21 +181,22 @@ private:
         
           string tokenUrl = baseUrl + "/oauth/token";
           fantastic_potato::Potato potato("potato");
-          fantastic_potato::DB db("test.db");
+          fantastic_potato::SchwabDB db("test.db");
 
           string resp = potato.post(tokenUrl, postData);
           response_.result(http::status::ok);
           response_.set(http::field::content_type, "application/json");
           cout << resp << endl;
           auto data = json::parse(resp);
-          auto refreshToken = data["refresh_token"];
-          auto accessToken = data["access_token"];
-          cout << refreshToken << " and " << accessToken <<endl;
-          if (typeid(refreshToken) == typeid(string))
-          db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
-          if(typeid(accessToken) == typeid(string))
-          db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')";
-
+          if (data.contains("refresh_token") && data.contains("access_token")) {
+            string refreshToken = data["refresh_token"];
+            string accessToken = data["access_token"];
+            cout << refreshToken << " and " << accessToken <<endl;
+            if (typeid(refreshToken) == typeid(string))
+            db.query("insert or replace into schwab_kv values('refreshToken', '"+refreshToken +"')");
+            if(typeid(accessToken) == typeid(string))
+            db.query("insert or replace into schwab_kv values('accessToken', '"+ accessToken +"')");
+          }
           beast::ostream(response_.body()) << resp;
         }
         else
@@ -255,43 +256,74 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
       });
 }
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-  int i;
-  for (i = 0; i< argc; i++) {
-    cout << azColName[i] << argv[i] <<endl;
-  }
-  return 0;
-}
-
 auto main(int argc, char** argv) -> int {
+  fantastic_potato::SchwabDB db("test.db");
+  // db.query("create table if not exists schwab_kv (key text, value text)");
+  string accessToken = db.getValueByType("accessToken");
+  clog << "accessToken: " << accessToken << endl;
+
+  string refreshToken = db.getValueByType("refreshToken");
+  clog << "refreshToken: " <<refreshToken << endl;
+
   string baseUrl = "https://api.schwabapi.com/v1";
   string appKey = std::getenv("SCHWAB_APP_KEY");
   string appSecret = std::getenv("SCHWAB_APP_SECRET");
   string callbackUrl = std::getenv("SCHWAB_CALLBACK_URL");
   string oauth = "oauth/authorize";
-  string url = fmt::format("{}/oauth/authorize?client_id={}&redirect_uri={}", baseUrl, appKey, callbackUrl);
+  if (accessToken != "" && refreshToken != "") {
 
-  cout << url << endl;
+    string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
+    string baseUrl = "https://api.schwabapi.com/v1";
 
-  try 
-  {
-      auto const address = net::ip::make_address("0.0.0.0");
-      unsigned short port = static_cast<unsigned short>(std::atoi("8081"));
+    string postData = fmt::format("grant_type=refresh_token&refresh_token={}&redirect_uri={}", refreshToken, callbackUrl);
 
-      net::io_context ioc{1};
+    string tokenUrl = baseUrl + "/oauth/token";
+    fantastic_potato::SchwabDB db("test.db");
+    fantastic_potato::Potato potato("potato");
 
-      tcp::acceptor acceptor{ioc, {address, port}};
-      tcp::socket socket{ioc};
-      http_server(acceptor, socket);
+    string resp = potato.post(tokenUrl, postData);
+    cout << resp << endl;
+    auto data = json::parse(resp);
+    if (data.contains("refresh_token") && data.contains("access_token")) {
+    refreshToken = data["refresh_token"];
+    accessToken = data["access_token"];
+    cout << refreshToken << " and " << accessToken <<endl;
+    if (typeid(refreshToken) == typeid(string))
+        db.query("insert or replace into schwab_kv values('refreshToken', '" + refreshToken + "')");
+    if(typeid(accessToken) == typeid(string))
+        db.query("insert or replace into schwab_kv values('accessToken', '" + accessToken + "')");
+    }
 
-      ioc.run();
+
+    // string marketData = "https://api.schwabapi.com/marketdata/v1";
+    string quotes = "https://api.schwabapi.com/marketdata/v1/quotes?symbols=AAPL";
+    potato.setBearerAuth(accessToken);
+    resp = potato.getAfterAuth(quotes);
+    cout << resp << endl;
+    return EXIT_SUCCESS;
+  } else {
+    string url = fmt::format("{}/oauth/authorize?client_id={}&redirect_uri={}", baseUrl, appKey, callbackUrl);
+    cout << url << endl;
+    // create a http server to receive requests
+    try
+    {
+        auto const address = net::ip::make_address("0.0.0.0");
+        unsigned short port = static_cast<unsigned short>(std::atoi("8081"));
+
+        net::io_context ioc{1};
+
+        tcp::acceptor acceptor{ioc, {address, port}};
+        tcp::socket socket{ioc};
+        http_server(acceptor, socket);
+
+        ioc.run();
+    }
+    catch(std::exception const& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
   }
-  catch(std::exception const& e)
-  {
-      std::cerr << "Error: " << e.what() << std::endl;
-      return EXIT_FAILURE;
-  }
-
 
   return EXIT_SUCCESS;
 }

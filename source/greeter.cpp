@@ -91,3 +91,30 @@ std::string Potato::get(std::string url) const {
   return "error";
 }
 
+std::string Potato::getAfterAuth(std::string url) const {
+  CURL *curl;
+  CURLcode res;
+  std::string readBuffer;
+  curl = curl_easy_init();
+
+  struct curl_slist *headers= NULL; /* init to NULL is important */
+  headers = curl_slist_append(headers, bearerAuth.c_str());
+  headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    return readBuffer;
+  }
+  return "error";
+}
+
+void Potato::setBearerAuth(std::string accessToken) {
+  bearerAuth = "Authorization: Bearer " + accessToken;
+}
+
+
