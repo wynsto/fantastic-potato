@@ -53,12 +53,6 @@ string SchwabDB::query(string sql) {
   }
   // 清理语句句柄，准备执行下一个语句
   sqlite3_finalize(stmt);
-
-  int rc = sqlite3_exec(db, sql.c_str(), SchwabDB::callback, 0, &zErrMsg);
-  if (rc != SQLITE_OK) {
-    cout << zErrMsg << endl;
-    sqlite3_free(zErrMsg);
-  }
   return "SUCCESS";
 }
 
