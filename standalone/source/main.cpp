@@ -83,6 +83,7 @@ auto main(int argc, char** argv) -> int {
     eur = usd/eur;
     float cad = quotes["USD/CAD"]["quote"]["lastPrice"];
     float aud = quotes["AUD/USD"]["quote"]["lastPrice"];
+    uad = usd/aud;
     float sgd = quotes["USD/SGD"]["quote"]["lastPrice"];
     float thb = quotes["USD/THB"]["quote"]["lastPrice"];
 
