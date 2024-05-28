@@ -68,10 +68,29 @@ auto main(int argc, char** argv) -> int {
     schwab_personal_trading::Potato potato("potato");
     accessToken = potato.getAccessToken("refresh_token", refreshToken);
     // string marketData = "https://api.schwabapi.com/marketdata/v1";
-    string quotes = "https://api.schwabapi.com/marketdata/v1/quotes?symbols=AAPL";
+    string quotesUrl = "https://api.schwabapi.com/marketdata/v1/quotes?symbols=GBP/USD,USD/HKD,USD/CNH,USD/JPY,EUR/USD,USD/CAD,AUD/USD,USD/SGD,USD/THB";
     potato.setBearerAuth(accessToken);
-    string resp = potato.getAfterAuth(quotes);
+    string resp = potato.getAfterAuth(quotesUrl);
     cout << resp << endl;
+    auto quotes = json::parse(resp);
+    float usd = 1.0;
+    float gbp = quotes["GBP/USD"]["quote"]["lastPrice"];
+    gbp = usd/gbp;
+    float hkd = quotes["USD/HKD"]["quote"]["lastPrice"];
+    float cnh = quotes["USD/CNH"]["quote"]["lastPrice"];
+    float jpy = quotes["USD/JPY"]["quote"]["lastPrice"];
+    float eur = quotes["EUR/USD"]["quote"]["lastPrice"];
+    eur = usd/eur;
+    float cad = quotes["USD/CAD"]["quote"]["lastPrice"];
+    float aud = quotes["AUD/USD"]["quote"]["lastPrice"];
+    float sgd = quotes["USD/SGD"]["quote"]["lastPrice"];
+    float thb = quotes["USD/THB"]["quote"]["lastPrice"];
+
+    // create table fx_rate (hkd real, usd real, cny real, jpy real, gbp real, eur real, cad real, aud real, sgd real, thb real, time timestamp, date string);
+    string sql = fmt::format("INSERT INTO fx_rate (hkd, usd, cny, jpy, gbp, eur, cad, aud, sgd, thb, time, date) values ({}, 1, {}, {}, {}, {}, {}, {}, {}, {}, {}, date())", hkd, usd, cnh, jpy, gbp, eur, cad, aud, sgd, thb, timer);
+    clog << sql << endl;
+    db.query(sql);
+
     return EXIT_SUCCESS;
   } else {
     string url = fmt::format("{}/oauth/authorize?client_id={}&redirect_uri={}", baseUrl, appKey, callbackUrl);
