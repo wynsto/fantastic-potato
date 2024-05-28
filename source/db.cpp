@@ -2,7 +2,6 @@
 #include <sqlite3.h>
 
 #include <iostream>
-#include "db.h"
 
 using namespace std;
 using namespace schwab_personal_trading;
