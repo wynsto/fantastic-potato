@@ -89,7 +89,7 @@ auto main(int argc, char** argv) -> int {
     // create table fx_rate (hkd real, usd real, cny real, jpy real, gbp real, eur real, cad real, aud real, sgd real, thb real, time timestamp, date string);
     string sql = fmt::format("INSERT INTO fx_rate (hkd, usd, cny, jpy, gbp, eur, cad, aud, sgd, thb, time, date) values ({}, 1, {}, {}, {}, {}, {}, {}, {}, {}, {}, date())", hkd, usd, cnh, jpy, gbp, eur, cad, aud, sgd, thb, timer);
     clog << sql << endl;
-    schwab_personal_trading::SchwabDB fxRateDb("/home/wynston/dev/fxrates.db");
+    schwab_personal_trading::SchwabDB fxRateDb("/home/wynston/dev/flask-project/instance/home.sqlite");
 
     fxRateDb.query(sql);
 
