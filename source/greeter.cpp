@@ -81,7 +81,7 @@ string Potato::getAccessToken(string grantType, string token) {
   string baseUrl = "https://api.schwabapi.com/v1";
   string codeKey = grantType == "authorization_code" ? "code" : grantType;
 
-  string postData = fmt::format("grant_type={}&{}={}&redirect_uri={}", grantType, code, token,
+  string postData = fmt::format("grant_type={}&{}={}&redirect_uri={}", grantType, codeKey, token,
                                 callbackUrl);
 
   string tokenUrl = baseUrl + "/oauth/token";
