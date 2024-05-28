@@ -79,7 +79,7 @@ string Potato::get(string url) const {
 string Potato::getAccessToken(string grantType, string token) {
   string callbackUrl = getenv("SCHWAB_CALLBACK_URL");
   string baseUrl = "https://api.schwabapi.com/v1";
-  string codeKey = grantType == "authorization_code" ? "code" : grantType
+  string codeKey = grantType == "authorization_code" ? "code" : grantType;
 
   string postData = fmt::format("grant_type={}&{}={}&redirect_uri={}", grantType, code, token,
                                 callbackUrl);
