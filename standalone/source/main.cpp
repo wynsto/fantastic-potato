@@ -74,15 +74,15 @@ auto main(int argc, char** argv) -> int {
   auto resposes = quotes["response"];
   float usd = 1.0;
   string gbp = resposes[7]["o"];
-  gbp = usd / stof(gbp);
+  float fgbp = usd / stof(gbp);
   string hkd = resposes[4]["o"];
   string cnh = resposes[5]["o"];
   string jpy = resposes[3]["o"];
   string eur = resposes[0]["o"];
-  eur = usd / stof(eur);
+  float feur = usd / stof(eur);
   string cad = resposes[2]["o"];
   string aud = resposes[1]["o"];
-  aud = usd / stof(aud);
+  float faud = usd / stof(aud);
   string sgd = resposes[6]["o"];
   string thb = resposes[8]["o"];
 
@@ -91,7 +91,7 @@ auto main(int argc, char** argv) -> int {
   string sql = fmt::format(
       "INSERT INTO fx_rate (hkd, usd, cny, jpy, gbp, eur, cad, aud, sgd, thb, time, date) values "
       "({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, date())",
-      hkd, usd, cnh, jpy, gbp, eur, cad, aud, sgd, thb, timer);
+      hkd, usd, cnh, jpy, fgbp, feur, cad, faud, sgd, thb, timer);
   clog << sql << endl;
   schwab_personal_trading::SchwabDB fxRateDb(
       "/home/wynston/dev/flask-project/instance/home.sqlite");
