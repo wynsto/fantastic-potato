@@ -67,6 +67,7 @@ auto main(int argc, char** argv) -> int {
   if (accessToken != "" && refreshToken != "") {
     schwab_personal_trading::Potato potato("potato");
     accessToken = potato.getAccessToken("refresh_token", refreshToken);
+
     // string marketData = "https://api.schwabapi.com/marketdata/v1";
     string quotesUrl = "https://api.schwabapi.com/marketdata/v1/quotes?symbols=GBP/USD,USD/HKD,USD/CNH,USD/JPY,EUR/USD,USD/CAD,AUD/USD,USD/SGD,USD/THB";
     potato.setBearerAuth(accessToken);
@@ -83,7 +84,7 @@ auto main(int argc, char** argv) -> int {
     eur = usd/eur;
     float cad = quotes["USD/CAD"]["quote"]["lastPrice"];
     float aud = quotes["AUD/USD"]["quote"]["lastPrice"];
-    uad = usd/aud;
+    aud = usd/aud;
     float sgd = quotes["USD/SGD"]["quote"]["lastPrice"];
     float thb = quotes["USD/THB"]["quote"]["lastPrice"];
 

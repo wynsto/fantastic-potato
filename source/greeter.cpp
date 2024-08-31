@@ -90,7 +90,7 @@ string Potato::getAccessToken(string grantType, string token) {
   string resp = this->post(tokenUrl, postData);
   cout << resp << endl;
   auto data = json::parse(resp);
-  string accessToken, refreshToken;
+  string accessToken = "", refreshToken;
   if (data.contains("refresh_token") && data.contains("access_token")) {
     refreshToken = data["refresh_token"];
     accessToken = data["access_token"];
@@ -99,7 +99,11 @@ string Potato::getAccessToken(string grantType, string token) {
       db.query("insert or replace into schwab_kv values('refreshToken', '" + refreshToken + "')");
     if (typeid(accessToken) == typeid(string))
       db.query("insert or replace into schwab_kv values('accessToken', '" + accessToken + "')");
+  } else {
+      db.query("insert or replace into schwab_kv values('refreshToken', '')");
+      db.query("insert or replace into schwab_kv values('accessToken', '')");
   }
+
   return accessToken;
 }
 
